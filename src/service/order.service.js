@@ -121,4 +121,28 @@ export class OrderService {
     };
   }
 
+  async cancelOrderByUser(userId, orderId) {
+  const order = await this.orderRepo.getOrderById(orderId);
+
+  if (!order) throw new ValidationError("Order not found");
+
+  if (order.user_id !== userId)
+    throw new ValidationError("Unauthorized cancellation");
+
+  if (order.order_status === "DELIVERED")
+    throw new ValidationError("Delivered orders cannot be cancelled");
+
+  if (order.order_status.includes("CANCELLED"))
+    throw new ValidationError("Order already cancelled");
+
+  // Update order status
+  await this.orderRepo.updateOrderStatus(orderId, "CANCELLED_BY_USER");
+
+  // OPTIONAL → Restore inventory
+  const items = await this.orderRepo.getOrderItems(orderId);
+  await this.orderRepo.restoreInventory(items);
+
+  return { orderId, status: "CANCELLED_BY_USER" };
+}
+
 }

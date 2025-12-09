@@ -103,3 +103,25 @@ export const getOrderDetails = async (req, res) => {
     });
   }
 };
+
+export const cancelOrderByUser = async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const { orderId } = req.params;
+
+    const result = await orderService.cancelOrderByUser(userId, orderId);
+
+    res.status(200).json({
+      success: true,
+      message: "Order cancelled successfully",
+      data: result
+    });
+  } catch (error) {
+    console.error("Cancel order error:", error);
+
+    res.status(400).json({
+      success: false,
+      message: error.message || "Unable to cancel order"
+    });
+  }
+};

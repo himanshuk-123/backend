@@ -117,7 +117,7 @@ export class OrderRepository {
     const result = await pool.request()
       .input("orderId", sql.Int, orderId)
       .query(`
-        SELECT o.*, s.shop_name, s.image_url as shop_image
+        SELECT o.*, s.name, s.image_url as shop_image
         FROM Orders o
         JOIN Shops s ON o.shop_id = s.shop_id
         WHERE o.order_id = @orderId
@@ -131,7 +131,7 @@ export class OrderRepository {
     const result = await pool.request()
       .input("orderId", sql.Int, orderId)
       .query(`
-        SELECT oi.*, p.product_name, p.image_url
+        SELECT oi.*, p.name, p.image_url
         FROM OrderItems oi
         JOIN Products p ON oi.product_id = p.product_id
         WHERE oi.order_id = @orderId
@@ -156,5 +156,33 @@ export class OrderRepository {
       .query(`SELECT * FROM Payments WHERE order_id = @orderId`);
     return result.recordset[0];
   }
+
+  async updateOrderStatus(orderId, status) {
+  const pool = await poolPromise;
+  await pool.request()
+    .input("orderId", sql.Int, orderId)
+    .input("status", sql.NVarChar, status)
+    .query(`
+      UPDATE Orders
+      SET order_status = @status
+      WHERE order_id = @orderId
+    `);
+}
+
+async restoreInventory(items) {
+  const pool = await poolPromise;
+
+  for (let item of items) {
+    await pool.request()
+      .input("product_id", sql.Int, item.product_id)
+      .input("qty", sql.Int, item.quantity)
+      .query(`
+        UPDATE Inventory
+        SET stock_quantity = stock_quantity + @qty
+        WHERE product_id = @product_id
+      `);
+  }
+}
+
 
 }
