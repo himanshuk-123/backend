@@ -12,7 +12,7 @@ export class ShopDashboardRepository {
         .input('shopId', sql.Int, shopId)
         .query(`
           SELECT COUNT(DISTINCT product_id) AS totalProducts
-          FROM Inventory
+          FROM dukaan.Inventory
           WHERE shop_id = @shopId
             AND is_deleted = 0
         `);
@@ -25,7 +25,7 @@ export class ShopDashboardRepository {
         .input('shopId', sql.Int, shopId)
         .query(`
           SELECT ISNULL(SUM(stock_quantity), 0) AS totalStock
-          FROM Inventory
+          FROM dukaan.Inventory
           WHERE shop_id = @shopId
             AND is_deleted = 0
         `);
@@ -38,7 +38,7 @@ export class ShopDashboardRepository {
         .input('shopId', sql.Int, shopId)
         .query(`
           SELECT COUNT(*) AS totalOrders
-          FROM Orders
+          FROM dukaan.Orders
           WHERE shop_id = @shopId
         `);
 
@@ -50,7 +50,7 @@ export class ShopDashboardRepository {
         .input('shopId', sql.Int, shopId)
         .query(`
           SELECT COUNT(*) AS pendingOrders
-          FROM Orders
+          FROM dukaan.Orders
           WHERE shop_id = @shopId
             AND order_status = 'processing'
         `);
@@ -63,7 +63,7 @@ export class ShopDashboardRepository {
         .input('shopId', sql.Int, shopId)
         .query(`
           SELECT COUNT(*) AS completedOrders
-          FROM Orders
+          FROM dukaan.Orders
           WHERE shop_id = @shopId
             AND order_status = 'delivered'
         `);
@@ -76,7 +76,7 @@ export class ShopDashboardRepository {
         .input('shopId', sql.Int, shopId)
         .query(`
           SELECT ISNULL(SUM(total_amount), 0) AS totalRevenue
-          FROM Orders
+          FROM dukaan.Orders
           WHERE shop_id = @shopId
             AND order_status = 'delivered'
         `);
@@ -92,10 +92,10 @@ export class ShopDashboardRepository {
             oi.product_id,
             p.name,
             SUM(oi.quantity) AS total_sold
-          FROM OrderItems oi
-          JOIN Orders o 
+          FROM dukaan.OrderItems oi
+          JOIN dukaan.Orders o 
             ON oi.order_id = o.order_id
-          JOIN Products p 
+          JOIN dukaan.Products p 
             ON oi.product_id = p.product_id
           WHERE o.shop_id = @shopId
           GROUP BY oi.product_id, p.name
@@ -116,7 +116,7 @@ export class ShopDashboardRepository {
             order_status,
             payment_status,
             created_at
-          FROM Orders
+          FROM dukaan.Orders
           WHERE shop_id = @shopId
           ORDER BY created_at DESC
         `);
@@ -151,7 +151,7 @@ export class ShopDashboardRepository {
       .input('userId', sql.Int, userId)
       .query(`
         SELECT shop_id 
-        FROM Shops
+        FROM dukaan.Shops
         WHERE shop_id = @shopId
         AND owner_id = @userId
         AND is_deleted = 0

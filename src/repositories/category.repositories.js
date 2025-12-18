@@ -15,8 +15,8 @@ export class CategoryRepository {
     c.name,
     c.description,
     COUNT(s.shop_id) AS shops
-FROM Categories c
-LEFT JOIN Shops s ON s.cat_id = c.cat_id
+FROM dukaan.Categories c
+LEFT JOIN dukaan.Shops s ON s.cat_id = c.cat_id
 GROUP BY 
     c.cat_id,
     c.name,
@@ -53,7 +53,7 @@ GROUP BY
         .input("category", sql.NVarChar(100), category)
         .input("search", sql.NVarChar, `%${search}%`).query(`
           SELECT COUNT(*) as total
-          FROM Shops s
+          FROM dukaan.Shops s
           WHERE s.category = @category 
             AND s.is_deleted = 0 
             AND s.is_active = 1
@@ -83,8 +83,8 @@ GROUP BY
             s.image_url,
             s.created_at,
             u.name as owner_name
-          FROM Shops s
-          INNER JOIN Users u ON s.owner_id = u.user_id
+          FROM dukaan.Shops s
+          INNER JOIN dukaan.Users u ON s.owner_id = u.user_id
           WHERE s.category = @category 
             AND s.is_deleted = 0 
             AND s.is_active = 1

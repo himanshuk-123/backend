@@ -28,8 +28,8 @@ export class ProductRepository {
 
       const countQuery = `
         SELECT COUNT(DISTINCT p.product_id) AS total
-        FROM Products p
-        INNER JOIN Inventory i 
+        FROM dukaan.Products p
+        INNER JOIN dukaan.Inventory i 
           ON p.product_id = i.product_id AND i.is_deleted = 0
         WHERE ${whereClause}
         ${searchCondition}
@@ -61,10 +61,10 @@ export class ProductRepository {
           i.selling_price,
 
           s.name AS shop_name
-        FROM Products p
-        INNER JOIN Inventory i 
+        FROM dukaan.Products p
+        INNER JOIN dukaan.Inventory i 
           ON p.product_id = i.product_id AND i.is_deleted = 0
-        INNER JOIN Shops s 
+        INNER JOIN dukaan.Shops s 
           ON i.shop_id = s.shop_id
         WHERE ${whereClause}
         ${searchCondition}
@@ -130,12 +130,12 @@ export class ProductRepository {
 
               s.name AS shop_name,
               s.category AS shop_category
-            FROM Products p
-            LEFT JOIN Inventory i 
+            FROM dukaan.Products p
+            LEFT JOIN dukaan.Inventory i 
               ON p.product_id = i.product_id 
               AND i.shop_id = @shopId 
               AND i.is_deleted = 0
-            LEFT JOIN Shops s 
+            LEFT JOIN dukaan.Shops s 
               ON i.shop_id = s.shop_id
             WHERE p.product_id = @productId AND p.is_deleted = 0
           `);
@@ -154,15 +154,7 @@ export class ProductRepository {
             Base_Price,
             image_url,
             created_at
-          FROM Products
-          WHERE product_id = @productId AND is_deleted = 0
-        `);
-
-      return result.recordset[0] || null;
-
-    } catch (error) {
-      console.error('Database error in findById:', error);
-      throw new Error(error.message);
+          FROM dukaan.Products
     }
   }
 
@@ -181,7 +173,7 @@ export class ProductRepository {
         .input('Base_Price', sql.Decimal(10, 2), Base_Price)
         .input('image_url', sql.NVarChar(500), image_url)
         .query(`
-          INSERT INTO Products (name, description, Base_Price, image_url   )
+          INSERT INTO dukaan.Products (name, description, Base_Price, image_url   )
           OUTPUT INSERTED.*
           VALUES (@name, @description, @Base_Price, @image_url)
         `);
@@ -225,7 +217,7 @@ export class ProductRepository {
       }
 
       const result = await req.query(`
-        UPDATE Products
+        UPDATE dukaan.Products
         SET ${queryParts.join(', ')}
         OUTPUT INSERTED.*
         WHERE product_id = @productId
@@ -251,7 +243,7 @@ export class ProductRepository {
         .input('productId', sql.Int, productId)
         .input('imageUrl', sql.NVarChar(500), imageUrl)
         .query(`
-          UPDATE Products
+          UPDATE dukaan.Products
           SET image_url = @imageUrl
           WHERE product_id = @productId
         `);
@@ -280,7 +272,7 @@ export class ProductRepository {
         .input('selling_price', sql.Decimal(10, 2), selling_price)
         .input('unit', sql.NVarChar(50), unit)
         .query(`
-          INSERT INTO Inventory (shop_id, product_id, stock_quantity, selling_price,unit)
+          INSERT INTO dukaan.Inventory (shop_id, product_id, stock_quantity, selling_price,unit)
           OUTPUT INSERTED.*
           VALUES (@shopId, @productId, @stock_quantity, @selling_price,@unit)
         `);
@@ -321,7 +313,7 @@ export class ProductRepository {
       }
 
       const query = `
-        UPDATE Inventory
+        UPDATE dukaan.Inventory
         SET ${updates.join(', ')}
         OUTPUT INSERTED.*
         WHERE id = @inventoryId AND is_deleted = 0
@@ -349,7 +341,7 @@ export class ProductRepository {
         .input('productId', sql.Int, productId)
         .query(`
           SELECT *
-          FROM Inventory
+          FROM dukaan.Inventory
           WHERE shop_id = @shopId 
             AND product_id = @productId
             AND is_deleted = 0
@@ -381,8 +373,8 @@ export class ProductRepository {
               i.stock_quantity,
               i.selling_price,
               i.is_deleted
-            FROM Products p
-            LEFT JOIN Inventory i 
+            FROM dukaan.Products p
+            LEFT JOIN dukaan.Inventory i 
               ON p.product_id = i.product_id 
               AND i.shop_id = @shopId
             WHERE p.product_id = @productId
@@ -407,8 +399,8 @@ export class ProductRepository {
           SELECT 
             p.product_id,
             SUM(CASE WHEN i.is_deleted = 0 THEN i.stock_quantity ELSE 0 END) AS total_stock
-          FROM Products p
-          LEFT JOIN Inventory i 
+          FROM dukaan.Products p
+          LEFT JOIN dukaan.Inventory i 
             ON p.product_id = i.product_id
           WHERE p.product_id = @productId AND p.is_deleted = 0
           GROUP BY p.product_id
@@ -443,8 +435,8 @@ export class ProductRepository {
         .input('ownerId', sql.Int, ownerId)
         .query(`
           SELECT COUNT(*) AS count
-          FROM Inventory i
-          INNER JOIN Shops s 
+          FROM dukaan.Inventory i
+          INNER JOIN dukaan.Shops s 
             ON i.shop_id = s.shop_id
           WHERE i.product_id = @productId
             AND i.is_deleted = 0
@@ -472,8 +464,8 @@ export class ProductRepository {
         .input('ownerId', sql.Int, ownerId)
         .query(`
           SELECT COUNT(*) AS count
-          FROM Inventory i
-          INNER JOIN Shops s 
+          FROM dukaan.Inventory i
+          INNER JOIN dukaan.Shops s 
             ON i.shop_id = s.shop_id
           WHERE i.id = @inventoryId
             AND i.is_deleted = 0
@@ -516,9 +508,9 @@ export class ProductRepository {
 
       const countResult = await countReq.query(`
         SELECT COUNT(DISTINCT p.product_id) AS total
-        FROM Products p
-        INNER JOIN Inventory i ON p.product_id = i.product_id AND i.is_deleted = 0
-        INNER JOIN Shops s ON i.shop_id = s.shop_id
+        FROM dukaan.Products p
+        INNER JOIN dukaan.Inventory i ON p.product_id = i.product_id AND i.is_deleted = 0
+        INNER JOIN dukaan.Shops s ON i.shop_id = s.shop_id
         WHERE ${whereClause}
         ${searchCondition}
       `);
@@ -550,10 +542,10 @@ export class ProductRepository {
           i.unit,
 
           s.name AS shop_name
-        FROM Products p
-        INNER JOIN Inventory i 
+        FROM dukaan.Products p
+        INNER JOIN dukaan.Inventory i 
           ON p.product_id = i.product_id AND i.is_deleted = 0
-        INNER JOIN Shops s 
+        INNER JOIN dukaan.Shops s 
           ON i.shop_id = s.shop_id
         WHERE ${whereClause}
         ${searchCondition}
@@ -595,14 +587,14 @@ export class ProductRepository {
 
         // 1. Soft delete Inventory
         await request.query(`
-          UPDATE Inventory
+          UPDATE dukaan.Inventory
           SET is_deleted = 1, deleted_at = GETDATE()
           WHERE product_id = @productId
         `);
 
         // 2. Soft delete Product
         const result = await request.query(`
-          UPDATE Products
+          UPDATE dukaan.Products
           SET is_deleted = 1, deleted_at = GETDATE()
           OUTPUT INSERTED.product_id
           WHERE product_id = @productId

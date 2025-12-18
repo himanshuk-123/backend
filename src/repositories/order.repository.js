@@ -13,7 +13,7 @@ export class OrderRepository {
       .input("total", sql.Decimal(10, 2), total)
       .input("itemCount", sql.Int, itemCount)
       .query(`
-        INSERT INTO Orders (user_id, shop_id, total_amount, item_count)
+        INSERT INTO dukaan.Orders (user_id, shop_id, total_amount, item_count)
         OUTPUT INSERTED.*
         VALUES (@userId, @shopId, @total, @itemCount)
       `);
@@ -31,7 +31,7 @@ export class OrderRepository {
         .input("quantity", sql.Int, item.quantity)
         .input("price", sql.Decimal(10,2), item.price)
         .query(`
-          INSERT INTO OrderItems(order_id, product_id, quantity, price_at_time)
+          INSERT INTO dukaan.OrderItems(order_id, product_id, quantity, price_at_time)
           VALUES(@order_id, @product_id, @quantity, @price)
         `);
     }
@@ -51,7 +51,7 @@ export class OrderRepository {
       .input("state", sql.NVarChar, address.state)
       .input("pincode", sql.NVarChar, address.pincode)
       .query(`
-        INSERT INTO OrderAddresses
+        INSERT INTO dukaan.OrderAddresses
         (order_id, full_name, phone, house, landmark, city, state, pincode)
         VALUES
         (@order_id, @full_name, @phone, @house, @landmark, @city, @state, @pincode)
@@ -67,7 +67,7 @@ export class OrderRepository {
       .input("amount", sql.Decimal(10, 2), amount)
       .input("method", sql.NVarChar, method)
       .query(`
-        INSERT INTO Payments(order_id, amount, payment_method)
+        INSERT INTO dukaan.Payments(order_id, amount, payment_method)
         VALUES(@order_id, @amount, @method)
       `);
   }
@@ -80,7 +80,7 @@ export class OrderRepository {
         .input("product_id", sql.Int, item.product_id)
         .input("qty", sql.Int, item.quantity)
         .query(`
-          UPDATE Inventory
+          UPDATE dukaan.Inventory
           SET stock_quantity = stock_quantity - @qty
           WHERE product_id = @product_id AND stock_quantity >= @qty
         `);
@@ -93,7 +93,7 @@ export class OrderRepository {
 
     await request
       .input("cart_id", sql.Int, cartId)
-      .query(`DELETE FROM CartItems WHERE cart_id = @cart_id`);
+      .query(`DELETE FROM dukaan.CartItems WHERE cart_id = @cart_id`);
   }
 
   // Get orders by user
@@ -103,8 +103,8 @@ export class OrderRepository {
       .input("userId", sql.Int, userId)
       .query(`
         SELECT o.*, s.name, s.image_url as shop_image
-        FROM Orders o
-        JOIN Shops s ON o.shop_id = s.shop_id
+        FROM dukaan.Orders o
+        JOIN dukaan.Shops s ON o.shop_id = s.shop_id
         WHERE o.user_id = @userId
         ORDER BY o.created_at DESC
       `);
@@ -118,8 +118,8 @@ export class OrderRepository {
       .input("orderId", sql.Int, orderId)
       .query(`
         SELECT o.*, s.name, s.image_url as shop_image
-        FROM Orders o
-        JOIN Shops s ON o.shop_id = s.shop_id
+        FROM dukaan.Orders o
+        JOIN dukaan.Shops s ON o.shop_id = s.shop_id
         WHERE o.order_id = @orderId
       `);
     return result.recordset[0];
@@ -132,8 +132,8 @@ export class OrderRepository {
       .input("orderId", sql.Int, orderId)
       .query(`
         SELECT oi.*, p.name, p.image_url
-        FROM OrderItems oi
-        JOIN Products p ON oi.product_id = p.product_id
+        FROM dukaan.OrderItems oi
+        JOIN dukaan.Products p ON oi.product_id = p.product_id
         WHERE oi.order_id = @orderId
       `);
     return result.recordset;
@@ -144,7 +144,7 @@ export class OrderRepository {
     const pool = await poolPromise;
     const result = await pool.request()
       .input("orderId", sql.Int, orderId)
-      .query(`SELECT * FROM OrderAddresses WHERE order_id = @orderId`);
+      .query(`SELECT * FROM dukaan.OrderAddresses WHERE order_id = @orderId`);
     return result.recordset[0];
   }
 
@@ -153,7 +153,7 @@ export class OrderRepository {
     const pool = await poolPromise;
     const result = await pool.request()
       .input("orderId", sql.Int, orderId)
-      .query(`SELECT * FROM Payments WHERE order_id = @orderId`);
+      .query(`SELECT * FROM dukaan.Payments WHERE order_id = @orderId`);
     return result.recordset[0];
   }
 
@@ -163,7 +163,7 @@ export class OrderRepository {
     .input("orderId", sql.Int, orderId)
     .input("status", sql.NVarChar, status)
     .query(`
-      UPDATE Orders
+      UPDATE dukaan.Orders
       SET order_status = @status
       WHERE order_id = @orderId
     `);
@@ -177,7 +177,7 @@ async restoreInventory(items) {
       .input("product_id", sql.Int, item.product_id)
       .input("qty", sql.Int, item.quantity)
       .query(`
-        UPDATE Inventory
+        UPDATE dukaan.Inventory
         SET stock_quantity = stock_quantity + @qty
         WHERE product_id = @product_id
       `);

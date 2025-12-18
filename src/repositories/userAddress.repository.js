@@ -23,7 +23,7 @@ export class UserAddressRepository {
             pincode,
             is_default,
             created_at
-          FROM UserAddresses
+          FROM dukaan.UserAddresses
           WHERE user_id = @userId AND is_deleted = 0
           ORDER BY is_default DESC, created_at DESC
         `);
@@ -46,7 +46,7 @@ export class UserAddressRepository {
         .input('userId', sql.Int, userId)
         .query(`
           SELECT TOP 1 *
-          FROM UserAddresses
+          FROM dukaan.UserAddresses
           WHERE user_id = @userId 
             AND is_deleted = 0 
             AND is_default = 1
@@ -77,7 +77,7 @@ export class UserAddressRepository {
         .input('pincode', sql.NVarChar, addressData.pincode)
         .input('is_default', sql.Bit, addressData.is_default ?? 0)
         .query(`
-          INSERT INTO UserAddresses
+          INSERT INTO dukaan.UserAddresses
           (user_id, full_name, phone, house, landmark, city, state, pincode, is_default)
           OUTPUT INSERTED.*
           VALUES
@@ -101,7 +101,7 @@ export class UserAddressRepository {
       await pool.request()
         .input('userId', sql.Int, userId)
         .query(`
-          UPDATE UserAddresses
+          UPDATE dukaan.UserAddresses
           SET is_default = 0
           WHERE user_id = @userId AND is_deleted = 0
         `);
@@ -124,7 +124,7 @@ export class UserAddressRepository {
         .input('userId', sql.Int, userId)
         .input('addressId', sql.Int, addressId)
         .query(`
-          UPDATE UserAddresses
+          UPDATE dukaan.UserAddresses
           SET is_default = 1
           WHERE address_id = @addressId 
             AND user_id = @userId
@@ -149,7 +149,7 @@ export class UserAddressRepository {
         .input('userId', sql.Int, userId)
         .input('addressId', sql.Int, addressId)
         .query(`
-          UPDATE UserAddresses
+          UPDATE dukaan.UserAddresses
           SET is_deleted = 1,
               deleted_at = GETDATE()
           WHERE address_id = @addressId

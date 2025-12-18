@@ -18,7 +18,7 @@ export class CartRepository {
       // First, try to find existing cart
       const query = `
         SELECT cart_id, user_id, is_active, created_at, updated_at
-        FROM Carts
+        FROM dukaan.Carts
         WHERE user_id = @userId AND is_active = 1
       `;
       const result = await request.query(query);
@@ -27,7 +27,7 @@ export class CartRepository {
       }
       // Create new cart if doesn't exist
       const insertQuery = `
-        INSERT INTO Carts (user_id, is_active)
+        INSERT INTO dukaan.Carts (user_id, is_active)
         OUTPUT INSERTED.cart_id, INSERTED.user_id, INSERTED.is_active, INSERTED.created_at, INSERTED.updated_at
         VALUES (@userId, 1)
       `;
@@ -76,10 +76,10 @@ async getCartWithItems(userId) {
          i.shop_id as product_shop_id,
         i.stock_quantity AS product_stock,
         i.selling_price AS product_price
-      FROM Carts c
-      LEFT JOIN CartItems ci ON c.cart_id = ci.cart_id
-      LEFT JOIN Products p ON ci.product_id = p.product_id
-      LEFT JOIN Inventory i ON ci.product_id = i.product_id AND i.is_deleted = 0
+      FROM dukaan.Carts c
+      LEFT JOIN dukaan.CartItems ci ON c.cart_id = ci.cart_id
+      LEFT JOIN dukaan.Products p ON ci.product_id = p.product_id
+      LEFT JOIN dukaan.Inventory i ON ci.product_id = i.product_id AND i.is_deleted = 0
       WHERE c.user_id = @userId AND c.is_active = 1
       ORDER BY ci.created_at DESC
     `;
@@ -147,7 +147,7 @@ async getCartWithItems(userId) {
         .input('productId', sql.Int, productId)
         .query(`
           SELECT item_id, quantity
-          FROM CartItems
+          FROM dukaan.CartItems
           WHERE cart_id = @cartId AND product_id = @productId
         `);
 
@@ -159,7 +159,7 @@ async getCartWithItems(userId) {
           .input('productId', sql.Int, productId)
           .input('quantity', sql.Int, newQuantity)
           .query(`
-            UPDATE CartItems
+            UPDATE dukaan.CartItems
             SET quantity = @quantity
             OUTPUT INSERTED.item_id, INSERTED.cart_id, INSERTED.product_id, INSERTED.quantity, INSERTED.created_at
             WHERE cart_id = @cartId AND product_id = @productId
@@ -178,7 +178,7 @@ async getCartWithItems(userId) {
           .input('productId', sql.Int, productId)
           .input('quantity', sql.Int, quantity)
           .query(`
-            INSERT INTO CartItems (cart_id, product_id, quantity)
+            INSERT INTO dukaan.CartItems (cart_id, product_id, quantity)
             OUTPUT INSERTED.item_id, INSERTED.cart_id, INSERTED.product_id, INSERTED.quantity, INSERTED.created_at
             VALUES (@cartId, @productId, @quantity)
           `);
@@ -285,7 +285,7 @@ async getCartWithItems(userId) {
 
       await pool.request()
         .input('cartId', sql.Int, cartId)
-        .query(`DELETE FROM CartItems WHERE cart_id = @cartId`);
+        .query(`DELETE FROM dukaan.CartItems WHERE cart_id = @cartId`);
 
       // Update cart updated_at
       await pool.request()

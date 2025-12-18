@@ -29,15 +29,15 @@ export class ShopOrderRepository {
           fi.name AS first_item_name,
           fi.quantity AS first_item_qty,
           fi.image_url AS first_item_image
-        FROM Orders o
-        LEFT JOIN Users u ON u.user_id = o.user_id
+        FROM dukaan.Orders o
+        LEFT JOIN dukaan.Users u ON u.user_id = o.user_id
         OUTER APPLY (
           SELECT TOP 1 
             p.name,
             oi.quantity,
             p.image_url
-          FROM OrderItems oi
-          JOIN Products p ON p.product_id = oi.product_id
+          FROM dukaan.OrderItems oi
+          JOIN dukaan.Products p ON p.product_id = oi.product_id
           WHERE oi.order_id = o.order_id
           ORDER BY oi.order_item_id ASC
         ) fi
@@ -58,8 +58,8 @@ export class ShopOrderRepository {
       .input("orderId", sql.Int, orderId)
       .query(`
         SELECT o.*, u.name AS customer_name, u.phone_number as customer_phone
-        FROM Orders o
-        LEFT JOIN Users u ON u.user_id = o.user_id
+        FROM dukaan.Orders o
+        LEFT JOIN dukaan.Users u ON u.user_id = o.user_id
         WHERE o.order_id = @orderId AND o.shop_id = @shopId
       `);
 
@@ -72,8 +72,8 @@ export class ShopOrderRepository {
       .query(`
         SELECT oi.order_item_id, oi.order_id, oi.product_id, oi.quantity, oi.price_at_time,
                p.name, p.image_url
-        FROM OrderItems oi
-        LEFT JOIN Products p ON p.product_id = oi.product_id
+        FROM dukaan.OrderItems oi
+        LEFT JOIN dukaan.Products p ON p.product_id = oi.product_id
         WHERE oi.order_id = @orderId
       `);
     const items = itemsReq.recordset;
@@ -81,13 +81,13 @@ export class ShopOrderRepository {
     // 3) address (snapshot)
     const addrReq = await pool.request()
       .input("orderId", sql.Int, orderId)
-      .query(`SELECT * FROM OrderAddresses WHERE order_id = @orderId`);
+      .query(`SELECT * FROM dukaan.OrderAddresses WHERE order_id = @orderId`);
     const address = addrReq.recordset[0] || null;
 
     // 4) payment
     const payReq = await pool.request()
       .input("orderId", sql.Int, orderId)
-      .query(`SELECT * FROM Payments WHERE order_id = @orderId ORDER BY created_at DESC`);
+      .query(`SELECT * FROM dukaan.Payments WHERE order_id = @orderId ORDER BY created_at DESC`);
     const payment = payReq.recordset[0] || null;
 
     return {
@@ -107,7 +107,7 @@ export class ShopOrderRepository {
       .input("orderId", sql.Int, orderId)
       .input("shopId", sql.Int, shopId)
       .query(`
-        UPDATE Orders
+        UPDATE dukaan.Orders
         SET order_status = @status, updated_at = GETDATE()
         WHERE order_id = @orderId AND shop_id = @shopId
       `);

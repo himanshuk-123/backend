@@ -17,7 +17,7 @@ export class UserRepository {
         .input('role', sql.NVarChar(50), role || 'user')
         .input('is_deleted', sql.Bit, 0)
         .query(`
-          INSERT INTO Users 
+          INSERT INTO dukaan.Users 
           (name, email, password_hash, phone_number, role, is_deleted, deleted_at)
           OUTPUT INSERTED.user_id, INSERTED.name, INSERTED.email,
                  INSERTED.phone_number, INSERTED.role,
@@ -51,7 +51,7 @@ export class UserRepository {
           SELECT user_id, name, email, password_hash,
                  phone_number, role, image_url,
                  created_at
-          FROM Users
+          FROM dukaan.Users
           WHERE email = @email AND is_deleted = 0
         `);
 
@@ -75,7 +75,7 @@ export class UserRepository {
           SELECT user_id, name, email,
                  phone_number, role, image_url,
                  created_at
-          FROM Users
+          FROM dukaan.Users
           WHERE user_id = @userId AND is_deleted = 0
         `);
 
@@ -97,7 +97,7 @@ export class UserRepository {
         .input('userId', sql.Int, userId)
         .input('imageUrl', sql.NVarChar(500), imageUrl)
         .query(`
-          UPDATE Users
+          UPDATE dukaan.Users
           SET image_url = @imageUrl
           WHERE user_id = @userId AND is_deleted = 0
         `);
@@ -132,7 +132,7 @@ async updateUserProfile(userId, data) {
     }
 
     const query = `
-      UPDATE Users
+      UPDATE dukaan.Users
       SET ${updateFields}
       OUTPUT INSERTED.user_id,
              INSERTED.name,

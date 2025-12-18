@@ -22,7 +22,7 @@ export class ShopRepository {
         .input('latitude', sql.Decimal(10, 8), latitude || null)
         .input('longitude', sql.Decimal(11, 8), longitude || null)
         .query(`
-          INSERT INTO Shops (owner_id, name, description, cat_id, address, pincode, latitude, longitude, is_active)
+          INSERT INTO dukaan.Shops (owner_id, name, description, cat_id, address, pincode, latitude, longitude, is_active)
           OUTPUT INSERTED.shop_id, INSERTED.owner_id, INSERTED.name, INSERTED.description, INSERTED.cat_id,
                  INSERTED.address, INSERTED.pincode, INSERTED.latitude, INSERTED.longitude, 
                  INSERTED.is_active, INSERTED.image_url, INSERTED.created_at
@@ -62,8 +62,8 @@ export class ShopRepository {
             s.created_at,
             u.name as owner_name,
             u.email as owner_email
-          FROM Shops s
-          INNER JOIN Users u ON s.owner_id = u.user_id
+          FROM dukaan.Shops s
+          INNER JOIN dukaan.Users u ON s.owner_id = u.user_id
           WHERE s.shop_id = @shopId AND s.is_deleted = 0
         `);
 
@@ -98,7 +98,7 @@ export class ShopRepository {
             is_deleted,
             image_url,
             created_at
-          FROM Shops
+          FROM dukaan.Shops
           WHERE owner_id = @ownerId AND is_deleted = 0
           ORDER BY created_at DESC
         `);
@@ -132,7 +132,7 @@ async findByCategory(cat_id, options = {}) {
       .input('search', sql.NVarChar, `%${search}%`)
       .query(`
         SELECT COUNT(*) as total
-        FROM Shops s
+        FROM dukaan.Shops s
         WHERE s.cat_id = @cat_id 
           AND s.is_deleted = 0 
           AND s.is_active = 1
@@ -159,7 +159,7 @@ async findByCategory(cat_id, options = {}) {
           s.is_active,
           s.image_url,
           s.created_at
-        FROM Shops s
+        FROM dukaan.Shops s
         WHERE s.cat_id = @cat_id 
           AND s.is_deleted = 0 
           AND s.is_active = 1
@@ -246,7 +246,7 @@ async update(shopId, shopData) {
     }
 
     const result = await request.query(`
-      UPDATE Shops
+      UPDATE dukaan.Shops
       SET ${updates.join(', ')}
       OUTPUT 
         INSERTED.shop_id,
@@ -287,7 +287,7 @@ async update(shopId, shopData) {
       const result = await pool.request()
         .input('shopId', sql.Int, shopId)
         .query(`
-          UPDATE Shops
+          UPDATE dukaan.Shops
           SET is_deleted = 1, deleted_at = GETDATE()
           WHERE shop_id = @shopId AND is_deleted = 0
         `);
@@ -312,7 +312,7 @@ async update(shopId, shopData) {
         .input('shopId', sql.Int, shopId)
         .input('imageUrl', sql.NVarChar(500), imageUrl)
         .query(`
-          UPDATE Shops
+          UPDATE dukaan.Shops
           SET image_url = @imageUrl
           WHERE shop_id = @shopId
         `);
@@ -338,7 +338,7 @@ async update(shopId, shopData) {
         .input('ownerId', sql.Int, ownerId)
         .query(`
           SELECT COUNT(*) as count
-          FROM Shops
+          FROM dukaan.Shops
           WHERE shop_id = @shopId AND owner_id = @ownerId AND is_deleted = 0
         `);
 
